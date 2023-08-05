@@ -1,0 +1,11 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Registers\\": ""
+        }
+    },
+    "name": "oranfry/registers",
+    "require": {
+        "php": ">=8.1"
+    }
+}

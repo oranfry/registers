@@ -35,6 +35,17 @@ final class Register
         return new $class;
     }
 
+    public static function deregister(string $type, ?string $name = null): void
+    {
+        if ($name) {
+            unset(self::$implementations[$type][$name]);
+            unset(self::$libraries[$type][$name]);
+        } else {
+            unset(self::$implementations[$type]);
+            unset(self::$libraries[$type]);
+        }
+    }
+
     public static function load(string $type, string $name): object
     {
         return self::$libraries[$type][$name] ??= self::create($type, $name);

@@ -11,21 +11,31 @@ It also introduces an alias layer to referring to classes, meaning you could eas
 First implement a register:
 
 ```php
-class Wozzle extends \Registers\Register
-{
-    protected static $implementations = [
-        'Big' => \Acme\Wozzles\Big::class,
-        'Small' => \Acme\Wozzles\Small::class,
-    ];
-}
+use Registers\Register;
+
+Register::register('wozzle', [
+    'big' => \Acme\Wozzles\Big::class,
+    'small' => \Acme\Wozzles\Small::class,
+]);
 ```
 
 Now you can grab a big or small wozzle from anywhere:
 
 ```php
-$wozzle = \Wozzle::load('Big');
+use Registers\Register;
+
+Register::::load('wozzle', 'big');
 
 $wozzle->fizzle();
+
+if (Register::::available('wozzle', 'medium')) {
+    Register::::load('wozzle', 'medium')->wiggle();
+}
+
+echo "All available wozzles:<br><pre>\n";
+var_dump(Register::::available('wozzle'));
+echo "</pre>";
+
 ```
 
 If this is the first time asking for a big wozzle, a new instance will be created and saved in the register.

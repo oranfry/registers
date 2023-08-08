@@ -2,28 +2,56 @@
 
 namespace Registers;
 
-use Exception;
-
-abstract class Register
+final class Register
 {
-    protected static array $library = [];
+    private static array $implementations = [];
+    private static array $libraries = [];
 
-    public static final function available(): array
+    private function __construct() {}
+
+    public static function available(string $type, ?string $name = null): array
     {
-        return array_keys(static::$implementations);
+        if (!array_key_exists($type, self::$implementations)) {
+            throw new Exception("Type [$type] has not been registered");
+        }
+
+        if ($name !== null) {
+            return array_key_exists($name, self::$implementations[$type]) ? [$name] : [];
+        }
+
+        return array_keys(self::$implementations[$type]);
     }
 
-    private static function create(string $name): object
+    private static function create(string $type, string $name): object
     {
-        if (!$class = static::$implementations[$name] ?? null) {
-            throw new Exception('Could not find an implementation for [' . get_called_class() . "]:[$name]");
+        if (!array_key_exists($type, self::$implementations)) {
+            throw new Exception("Type [$type] has not been registered");
+        }
+
+        if (!$class = self::$implementations[$type][$name] ?? null) {
+            throw new Exception("Could not find a [$type] implementation for [$name]");
         }
 
         return new $class;
     }
 
-    public static final function load(string $name): object
+    public static function load(string $type, string $name): object
     {
-        return self::$library[get_called_class()][$name] ??= self::create($name);
+        return self::$libraries[$type][$name] ??= self::create($type, $name);
+    }
+
+    public static function register(string $type, array $implementations): void
+    {
+        if (array_key_exists($type, self::$implementations)) {
+            throw new Exception("Type [$type] has already been registered");
+        }
+
+        foreach ($implementations as $name => $class) {
+            if (!is_string($class)) {
+                throw new Exception("Implementation array value should be the classname as string");
+            }
+        }
+
+        self::$implementations[$type] = $implementations;
     }
 }

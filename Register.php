@@ -4,6 +4,10 @@ namespace Registers;
 
 final class Register
 {
+    public const REPLACE = 1 << 0;
+    public const ADD = 1 << 1;
+    public const FORCE = 1 << 2;
+
     private static array $implementations = [];
     private static array $libraries = [];
 
@@ -51,18 +55,36 @@ final class Register
         return self::$libraries[$type][$name] ??= self::create($type, $name);
     }
 
-    public static function register(string $type, array $implementations): void
+    public static function register(string $type, array $implementations, int $flags = 0): void
     {
+        if ($flags & self::REPLACE) {
+            unset(self::$implementations[$type]);
+        }
+
         if (array_key_exists($type, self::$implementations)) {
             throw new Exception("Type [$type] has already been registered");
         }
 
         foreach ($implementations as $name => $class) {
+            if (!is_string($name)) {
+                throw new Exception("Implementation array key should be the alias as string");
+            }
+
             if (!is_string($class)) {
                 throw new Exception("Implementation array value should be the classname as string");
             }
         }
 
-        self::$implementations[$type] = $implementations;
+        if ($flags & self::ADD) {
+            foreach ($implementations as $name => $class) {
+                if (!($flags & self::FORCE) && isset(self::$implementations[$type][$name])) {
+                    throw new Exception("Implementation [$type/$name] already exists");
+                }
+
+                self::$implementations[$type][$name] = $class;
+            }
+        } else {
+            self::$implementations[$type] = $implementations;
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
     "autoload": {
         "psr-4": {
-            "Registers\\": ""
+            "OranFry\\Registers\\": ""
         }
     },
     "name": "oranfry/registers",
